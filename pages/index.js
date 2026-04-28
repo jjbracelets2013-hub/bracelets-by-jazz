@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
@@ -9,8 +12,14 @@ const products = [
 ];
 
 export default function Home() {
+  const [cart, setCart] = useState([]);
 
-  const handleCheckout = async (product) => {
+  const addToCart = (product) => {
+    setCart([...cart, product]);
+    alert(product.name + " added to cart!");
+  };
+
+  const checkout = async () => {
     const stripe = await stripePromise;
 
     const res = await fetch("/api/checkout", {
@@ -18,15 +27,7 @@ export default function Home() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        items: [
-          {
-            name: product.name,
-            price: product.price,
-            quantity: 1,
-          },
-        ],
-      }),
+      body: JSON.stringify({ items: cart }),
     });
 
     const data = await res.json();
@@ -35,54 +36,42 @@ export default function Home() {
 
   return (
     <div style={{ background: "#e6f4ff", minHeight: "100vh", padding: "20px" }}>
-{/* BANNER */}
-<div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-  <img 
-    src="/banner.png"
-    style={{
-      width: "90%",
-      maxWidth: "800px",
-      borderRadius: "15px"
-    }}
-  />
-</div>
+
       <h1 style={{ textAlign: "center", color: "#d4af37" }}>
         Bracelets By Jazz 💎
       </h1>
 
-      <p style={{ textAlign: "center" }}>
-        Your colorful jewelry store
-      </p>
+      {/* CART BUTTON */}
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        <button onClick={checkout} style={{
+          background: "green",
+          color: "white",
+          padding: "10px",
+          borderRadius: "6px"
+        }}>
+          Checkout ({cart.length})
+        </button>
+      </div>
 
-      {/* PRODUCT GRID */}
+      {/* PRODUCTS */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: "20px",
-        marginTop: "30px"
+        gap: "20px"
       }}>
         {products.map(product => (
           <div key={product.id} style={{
             background: "white",
             padding: "15px",
-            borderRadius: "12px",
-            textAlign: "center",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+            borderRadius: "10px",
+            textAlign: "center"
           }}>
-            <img src={product.image} style={{ width: "100%", borderRadius: "10px" }} />
-
+            <img src={product.image} style={{ width: "100%" }} />
             <h3>{product.name}</h3>
             <p>${product.price}</p>
 
-            <button onClick={() => handleCheckout(product)} style={{
-              background: "#0077cc",
-              color: "white",
-              padding: "10px",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer"
-            }}>
-              Buy Now
+            <button onClick={() => addToCart(product)}>
+              Add to Cart
             </button>
           </div>
         ))}
@@ -90,4 +79,5 @@ export default function Home() {
 
     </div>
   );
+}
 }
