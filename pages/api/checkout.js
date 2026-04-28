@@ -10,16 +10,14 @@ export default async function handler(req, res) {
     line_items: items.map(item => ({
       price_data: {
         currency: "usd",
-        product_data: {
-          name: item.name,
-        },
+        product_data: { name: item.name },
         unit_amount: item.price * 100,
       },
-      quantity: item.quantity,
+      quantity: 1,
     })),
     mode: "payment",
-    success_url: "https://your-vercel-site.vercel.app",
-    cancel_url: "https://your-vercel-site.vercel.app",
+    success_url: req.headers.origin,
+    cancel_url: req.headers.origin,
   });
 
   res.json({ id: session.id });
