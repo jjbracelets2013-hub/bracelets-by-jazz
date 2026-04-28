@@ -3,9 +3,9 @@ import { loadStripe } from "@stripe/stripe-js";
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 const products = [
-  { id: 1, name: "Rainbow Bracelet", price: 15, image: "/banner.png" },
-  { id: 2, name: "Ocean Bracelet", price: 20, image: "/banner.png" },
-  { id: 3, name: "Luxury Beads", price: 25, image: "/banner.png" },
+  { id: 1, name: "Rainbow Bracelet", price: 15, image: "/product1.png" },
+  { id: 2, name: "Ocean Bracelet", price: 20, image: "/product2.png" },
+  { id: 3, name: "Luxury Beads", price: 25, image: "/product3.png" },
 ];
 
 export default function Home() {
