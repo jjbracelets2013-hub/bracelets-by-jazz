@@ -35,7 +35,17 @@ export default function Home() {
 
   return (
     <div style={{ background: "#e6f4ff", minHeight: "100vh", padding: "20px" }}>
-
+{/* BANNER */}
+<div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
+  <img 
+    src="/banner.png"
+    style={{
+      width: "90%",
+      maxWidth: "800px",
+      borderRadius: "15px"
+    }}
+  />
+</div>
       <h1 style={{ textAlign: "center", color: "#d4af37" }}>
         Bracelets By Jazz 💎
       </h1>
