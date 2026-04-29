@@ -67,30 +67,19 @@ export default function Admin() {
     return result.secure_url;
   };
 
-  // 🛒 ADD PRODUCT
-  const addProduct = async () => {
-  console.log("CLICKED");
-
+ const addProduct = async () => {
   try {
     const db = getFirestore(app);
 
-    console.log("VALUES:", { name, price, image });
-
-    if (!name || !price || !image) {
-      alert("Missing fields!");
-      return;
-    }
-
-    const ref = await addDoc(collection(db, "products"), {
-      name,
-      price: Number(price),
-      image
+    await addDoc(collection(db, "products"), {
+      name: "Test Product",
+      price: 10,
+      image: "https://via.placeholder.com/200"
     });
 
-    console.log("SAVED:", ref.id);
-    alert("Product added!");
+    alert("Test product added!");
   } catch (err) {
-    console.error("ERROR:", err);
+    console.error(err);
     alert(err.message);
   }
 };
