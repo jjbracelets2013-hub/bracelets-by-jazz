@@ -1,98 +1,67 @@
-"use client";
-
-import { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-
-const products = [
-  { id: 1, name: "Rainbow Bracelet", price: 15, image: "/product1.png" },
-  { id: 2, name: "Ocean Bracelet", price: 20, image: "/product2.png" },
-  { id: 3, name: "Luxury Beads", price: 25, image: "/product3.png" },
-];
+import { useEffect, useState } from "react";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import app from "../lib/firebase";
 
 export default function Home() {
-  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
 
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-    alert(product.name + " added to cart!");
-  };
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-  const checkout = async () => {
-    if (cart.length === 0) {
-      alert("Cart is empty");
-      return;
-    }
+  const fetchProducts = async () => {
+    const db = getFirestore(app);
+    const snapshot = await getDocs(collection(db, "products"));
 
-    const stripe = await stripePromise;
+    const data = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ items: cart }),
-    });
-
-    const data = await res.json();
-    await stripe.redirectToCheckout({ sessionId: data.id });
+    setProducts(data);
   };
 
   return (
-    <div style={{ background: "#e6f4ff", minHeight: "100vh", padding: "20px" }}>
+    <div style={{ padding: "20px", textAlign: "center" }}>
+      <h1>Bracelets By Jazz 💎</h1>
+      <p>Your colorful jewelry store</p>
 
-      {/* LOGO */}
-      <div style={{ textAlign: "center" }}>
-        <img src="/logo.png" style={{ width: "120px" }} />
-      </div>
-
-      {/* BANNER */}
-      <div style={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
-        <img src="/banner.png" style={{ width: "90%", maxWidth: "700px", borderRadius: "12px" }} />
-      </div>
-
-      {/* TITLE */}
-      <h1 style={{ textAlign: "center", color: "#d4af37" }}>
-        Bracelets By Jazz 💎
-      </h1>
-
-      {/* CART BUTTON */}
-      <div style={{ textAlign: "center", margin: "20px" }}>
-        <button onClick={checkout} style={{
-          background: "green",
-          color: "white",
-          padding: "10px 20px",
-          borderRadius: "6px"
-        }}>
-          Checkout ({cart.length})
-        </button>
-      </div>
-
-      {/* PRODUCTS */}
       <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: "20px"
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        gap: "20px",
+        marginTop: "30px"
       }}>
         {products.map(product => (
           <div key={product.id} style={{
-            background: "white",
-            padding: "15px",
+            border: "1px solid #ddd",
             borderRadius: "10px",
-            textAlign: "center"
+            padding: "15px",
+            width: "250px"
           }}>
-            <img src={product.image} style={{ width: "100%" }} />
+            <img
+              src={product.image}
+              style={{ width: "100%", borderRadius: "10px" }}
+            />
+
             <h3>{product.name}</h3>
             <p>${product.price}</p>
 
-            <button onClick={() => addToCart(product)}>
-              Add to Cart
+            <button
+              style={{
+                background: "blue",
+                color: "white",
+                padding: "10px",
+                border: "none",
+                borderRadius: "5px"
+              }}
+            >
+              Buy Now
             </button>
           </div>
         ))}
       </div>
-
     </div>
   );
 }
