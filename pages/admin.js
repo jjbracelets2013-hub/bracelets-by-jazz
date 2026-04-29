@@ -69,34 +69,31 @@ export default function Admin() {
 
   // 🛒 ADD PRODUCT
   const addProduct = async () => {
+  console.log("CLICKED");
+
   try {
     const db = getFirestore(app);
 
+    console.log("VALUES:", { name, price, image });
+
     if (!name || !price || !image) {
-      alert("Fill all fields and upload an image first.");
+      alert("Missing fields!");
       return;
     }
 
-    await addDoc(collection(db, "products"), {
+    const ref = await addDoc(collection(db, "products"), {
       name,
       price: Number(price),
       image
     });
 
+    console.log("SAVED:", ref.id);
     alert("Product added!");
   } catch (err) {
-    console.error("ADD PRODUCT ERROR:", err);
+    console.error("ERROR:", err);
     alert(err.message);
   }
 };
-
-  const markDelivered = async (id) => {
-    const db = getFirestore(app);
-    await updateDoc(doc(db, "orders", id), {
-      status: "Delivered"
-    });
-    fetchOrders();
-  };
 
   // 🔐 LOGIN SCREEN
   if (!user) {
