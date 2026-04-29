@@ -25,6 +25,7 @@ export default function Admin() {
     });
   }, []);
 
+  // 🔐 LOGIN
   const login = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -35,6 +36,7 @@ export default function Admin() {
     }
   };
 
+  // 📦 GET ORDERS
   const fetchOrders = async () => {
     const db = getFirestore(app);
     const snapshot = await getDocs(collection(db, "orders"));
@@ -45,7 +47,7 @@ export default function Admin() {
     setOrders(data);
   };
 
-  // 🔥 IMAGE UPLOAD FUNCTION
+  // 📸 UPLOAD IMAGE TO CLOUDINARY
   const uploadImage = async (file) => {
     const data = new FormData();
     data.append("file", file);
@@ -67,22 +69,42 @@ export default function Admin() {
     return result.secure_url;
   };
 
- const addProduct = async () => {
-  try {
+  // 🛒 ADD PRODUCT
+  const addProduct = async () => {
+    try {
+      const db = getFirestore(app);
+
+      if (!name || !price || !image) {
+        alert("Fill all fields and upload an image first.");
+        return;
+      }
+
+      await addDoc(collection(db, "products"), {
+        name,
+        price: Number(price),
+        image
+      });
+
+      alert("Product added!");
+
+      // reset fields
+      setName("");
+      setPrice("");
+      setImage("");
+    } catch (err) {
+      console.error("ADD PRODUCT ERROR:", err);
+      alert(err.message);
+    }
+  };
+
+  // 🚚 MARK ORDER DELIVERED
+  const markDelivered = async (id) => {
     const db = getFirestore(app);
-
-    await addDoc(collection(db, "products"), {
-      name: "Test Product",
-      price: 10,
-      image: "https://via.placeholder.com/200"
+    await updateDoc(doc(db, "orders", id), {
+      status: "Delivered"
     });
-
-    alert("Test product added!");
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
-  }
-};
+    fetchOrders();
+  };
 
   // 🔐 LOGIN SCREEN
   if (!user) {
@@ -103,15 +125,23 @@ export default function Admin() {
     <div style={{ padding: "20px" }}>
       <h1>Admin Dashboard</h1>
 
+      {/* 🔥 ADD PRODUCT */}
       <h2>Add Product</h2>
 
-      <input placeholder="Name" onChange={(e)=>setName(e.target.value)} />
+      <input
+        placeholder="Product Name"
+        value={name}
+        onChange={(e)=>setName(e.target.value)}
+      />
       <br /><br />
 
-      <input placeholder="Price" onChange={(e)=>setPrice(e.target.value)} />
+      <input
+        placeholder="Price"
+        value={price}
+        onChange={(e)=>setPrice(e.target.value)}
+      />
       <br /><br />
 
-      {/* 📸 FILE UPLOAD */}
       <input
         type="file"
         onChange={async (e) => {
@@ -131,6 +161,7 @@ export default function Admin() {
 
       <hr />
 
+      {/* 📦 ORDERS */}
       <h2>Orders</h2>
 
       {orders.map(order => (
