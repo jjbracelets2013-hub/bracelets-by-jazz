@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, updateDoc, addDoc } from "firebase/firestore";
 import app from "../lib/firebase";
 
 export default function Admin() {
