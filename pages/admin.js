@@ -42,7 +42,17 @@ export default function Admin() {
     }));
     setOrders(data);
   };
+const addProduct = async () => {
+  const db = getFirestore(app);
 
+  await addDoc(collection(db, "products"), {
+    name,
+    price: Number(price),
+    image
+  });
+
+  alert("Product added!");
+};
   const markDelivered = async (id) => {
     const db = getFirestore(app);
     await updateDoc(doc(db, "orders", id), {
@@ -67,7 +77,31 @@ export default function Admin() {
   return (
     <div style={{ padding: "20px" }}>
       <h1>Admin Dashboard</h1>
+<h2>Add Product</h2>
 
+<input 
+  placeholder="Name" 
+  onChange={(e)=>setName(e.target.value)} 
+/>
+<br /><br />
+
+<input 
+  placeholder="Price" 
+  onChange={(e)=>setPrice(e.target.value)} 
+/>
+<br /><br />
+
+<input 
+  placeholder="Image (/logo.png)" 
+  onChange={(e)=>setImage(e.target.value)} 
+/>
+<br /><br />
+
+<button onClick={addProduct}>
+  Add Product
+</button>
+
+<hr />
       {orders.map(order => (
         <div key={order.id} style={{ border:"1px solid #ccc", margin:"10px", padding:"10px" }}>
           <p><strong>ID:</strong> {order.id}</p>
