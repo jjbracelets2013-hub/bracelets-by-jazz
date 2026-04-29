@@ -21,8 +21,14 @@ export default function Admin() {
   }, []);
 
   const login = async () => {
+  try {
     await signInWithEmailAndPassword(auth, email, password);
-  };
+    alert("Login success");
+  } catch (err) {
+    console.log(err);
+    alert(err.message);
+  }
+};
 
   const fetchOrders = async () => {
     const db = getFirestore(app);
