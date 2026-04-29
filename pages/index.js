@@ -6,9 +6,9 @@ import { loadStripe } from "@stripe/stripe-js";
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 const products = [
-  { id: 1, name: "Rainbow Bracelet", price: 4, image: "/product1.png" },
-  { id: 2, name: "Ocean Bracelet", price: 5, image: "/product2.png" },
-  { id: 3, name: "Luxury Beads", price: 7, image: "/product3.png" },
+  { id: 1, name: "Rainbow Bracelet", price: 15, image: "/product1.png" },
+  { id: 2, name: "Ocean Bracelet", price: 20, image: "/product2.png" },
+  { id: 3, name: "Luxury Beads", price: 25, image: "/product3.png" },
 ];
 
 export default function Home() {
@@ -20,6 +20,11 @@ export default function Home() {
   };
 
   const checkout = async () => {
+    if (cart.length === 0) {
+      alert("Cart is empty");
+      return;
+    }
+
     const stripe = await stripePromise;
 
     const res = await fetch("/api/checkout", {
@@ -37,16 +42,27 @@ export default function Home() {
   return (
     <div style={{ background: "#e6f4ff", minHeight: "100vh", padding: "20px" }}>
 
+      {/* LOGO */}
+      <div style={{ textAlign: "center" }}>
+        <img src="/logo.png" style={{ width: "120px" }} />
+      </div>
+
+      {/* BANNER */}
+      <div style={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
+        <img src="/banner.png" style={{ width: "90%", maxWidth: "700px", borderRadius: "12px" }} />
+      </div>
+
+      {/* TITLE */}
       <h1 style={{ textAlign: "center", color: "#d4af37" }}>
         Bracelets By Jazz 💎
       </h1>
 
       {/* CART BUTTON */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+      <div style={{ textAlign: "center", margin: "20px" }}>
         <button onClick={checkout} style={{
           background: "green",
           color: "white",
-          padding: "10px",
+          padding: "10px 20px",
           borderRadius: "6px"
         }}>
           Checkout ({cart.length})
