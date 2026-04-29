@@ -20,12 +20,12 @@ export default async function handler(req, res) {
   const { items } = req.body;
 
   // 🔥 SAVE ORDER TO FIREBASE
-  await addDoc(collection(db, "orders"), {
-    items,
-    status: "Pending",
-    createdAt: new Date()
-  });
-
+  const orderRef = await addDoc(collection(db, "orders"), {
+  items,
+  status: "Pending",
+  createdAt: new Date()
+});
+const orderId = orderRef.id;
   // 💳 STRIPE CHECKOUT
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       quantity: 1,
     })),
     mode: "payment",
-    success_url: req.headers.origin,
+    success_url: `${req.headers.origin}/success?orderId=${orderId}`,
     cancel_url: req.headers.origin,
   });
 
