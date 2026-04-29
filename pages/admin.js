@@ -69,7 +69,13 @@ export default function Admin() {
 
   // 🛒 ADD PRODUCT
   const addProduct = async () => {
+  try {
     const db = getFirestore(app);
+
+    if (!name || !price || !image) {
+      alert("Fill all fields and upload an image first.");
+      return;
+    }
 
     await addDoc(collection(db, "products"), {
       name,
@@ -78,7 +84,11 @@ export default function Admin() {
     });
 
     alert("Product added!");
-  };
+  } catch (err) {
+    console.error("ADD PRODUCT ERROR:", err);
+    alert(err.message);
+  }
+};
 
   const markDelivered = async (id) => {
     const db = getFirestore(app);
