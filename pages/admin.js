@@ -8,10 +8,12 @@ export default function Admin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [orders, setOrders] = useState([]);
-  
+
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [image, setImage] = useState("");
+  const [uploading, setUploading] = useState(false);
+
   const auth = getAuth(app);
 
   useEffect(() => {
@@ -24,14 +26,14 @@ export default function Admin() {
   }, []);
 
   const login = async () => {
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    alert("Login success");
-  } catch (err) {
-    console.log(err);
-    alert(err.message);
-  }
-};
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Login success");
+    } catch (err) {
+      console.log(err);
+      alert(err.message);
+    }
+  };
 
   const fetchOrders = async () => {
     const db = getFirestore(app);
@@ -42,17 +44,42 @@ export default function Admin() {
     }));
     setOrders(data);
   };
-const addProduct = async () => {
-  const db = getFirestore(app);
 
-  await addDoc(collection(db, "products"), {
-    name,
-    price: Number(price),
-    image
-  });
+  // 🔥 IMAGE UPLOAD FUNCTION
+  const uploadImage = async (file) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "my_uploads");
 
-  alert("Product added!");
-};
+    setUploading(true);
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dfijp0los/image/upload",
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+
+    const result = await res.json();
+    setUploading(false);
+
+    return result.secure_url;
+  };
+
+  // 🛒 ADD PRODUCT
+  const addProduct = async () => {
+    const db = getFirestore(app);
+
+    await addDoc(collection(db, "products"), {
+      name,
+      price: Number(price),
+      image
+    });
+
+    alert("Product added!");
+  };
+
   const markDelivered = async (id) => {
     const db = getFirestore(app);
     await updateDoc(doc(db, "orders", id), {
@@ -61,6 +88,7 @@ const addProduct = async () => {
     fetchOrders();
   };
 
+  // 🔐 LOGIN SCREEN
   if (!user) {
     return (
       <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -74,34 +102,41 @@ const addProduct = async () => {
     );
   }
 
+  // ✅ ADMIN DASHBOARD
   return (
     <div style={{ padding: "20px" }}>
       <h1>Admin Dashboard</h1>
-<h2>Add Product</h2>
 
-<input 
-  placeholder="Name" 
-  onChange={(e)=>setName(e.target.value)} 
-/>
-<br /><br />
+      <h2>Add Product</h2>
 
-<input 
-  placeholder="Price" 
-  onChange={(e)=>setPrice(e.target.value)} 
-/>
-<br /><br />
+      <input placeholder="Name" onChange={(e)=>setName(e.target.value)} />
+      <br /><br />
 
-<input 
-  placeholder="Image (/logo.png)" 
-  onChange={(e)=>setImage(e.target.value)} 
-/>
-<br /><br />
+      <input placeholder="Price" onChange={(e)=>setPrice(e.target.value)} />
+      <br /><br />
 
-<button onClick={addProduct}>
-  Add Product
-</button>
+      {/* 📸 FILE UPLOAD */}
+      <input
+        type="file"
+        onChange={async (e) => {
+          const file = e.target.files[0];
+          const url = await uploadImage(file);
+          setImage(url);
+        }}
+      />
 
-<hr />
+      {uploading && <p>Uploading image...</p>}
+
+      <br /><br />
+
+      <button onClick={addProduct}>
+        Add Product
+      </button>
+
+      <hr />
+
+      <h2>Orders</h2>
+
       {orders.map(order => (
         <div key={order.id} style={{ border:"1px solid #ccc", margin:"10px", padding:"10px" }}>
           <p><strong>ID:</strong> {order.id}</p>
