@@ -15,21 +15,25 @@ export default function Home() {
   }, []);
 
   const fetchProducts = async () => {
-    const db = getFirestore(app);
-    const snapshot = await getDocs(collection(db, "products"));
-    const data = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    setProducts(data);
+    try {
+      const db = getFirestore(app);
+      const snapshot = await getDocs(collection(db, "products"));
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setProducts(data);
+    } catch (err) {
+      console.error("ERROR FETCHING PRODUCTS:", err);
+    }
   };
 
-  // 🛒 ADD
+  // 🛒 ADD TO CART
   const addToCart = (product) => {
-    setCart([...cart, product]);
+    setCart(prev => [...prev, product]);
   };
 
-  // ❌ REMOVE
+  // ❌ REMOVE ITEM
   const removeFromCart = (index) => {
     const updated = [...cart];
     updated.splice(index, 1);
@@ -41,39 +45,53 @@ export default function Home() {
 
   // 💳 CHECKOUT
   const checkout = async () => {
-    const stripe = await stripePromise;
+    try {
+      const stripe = await stripePromise;
 
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ items: cart }),
-    });
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ items: cart }),
+      });
 
-    const session = await res.json();
+      const session = await res.json();
 
-    await stripe.redirectToCheckout({ sessionId: session.id });
+      await stripe.redirectToCheckout({ sessionId: session.id });
+    } catch (err) {
+      console.error("CHECKOUT ERROR:", err);
+    }
   };
 
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
-      <h1>Bracelets By Jazz 💎</h1>
+      
+      {/* HEADER */}
+      <h1 style={{ fontSize: "40px" }}>Bracelets By Jazz 💎</h1>
       <p>Your colorful jewelry store</p>
-      <a href="/track">
-  <button style={{
-    padding: "10px",
-    marginTop: "10px",
-    cursor: "pointer"
-  }}>
-  Track Order
-</a>
+
+      {/* TRACK ORDER BUTTON (SAFE POSITION) */}
+      <div style={{ marginBottom: "10px" }}>
+        <a href="/track">
+          <button style={{ padding: "10px", cursor: "pointer" }}>
+            Track Your Order 📦
+          </button>
+        </a>
+      </div>
+
+      {/* BANNER */}
       <img
         src="/banner.png"
-        style={{ width: "100%", maxWidth: "900px", borderRadius: "10px" }}
+        alt="Banner"
+        style={{
+          width: "100%",
+          maxWidth: "900px",
+          borderRadius: "10px"
+        }}
       />
 
-      {/* 🛒 OPEN CART */}
+      {/* CART BUTTON */}
       <div style={{ marginTop: "20px" }}>
         <button onClick={() => setShowCart(true)}>
           Cart ({cart.length})
@@ -81,21 +99,34 @@ export default function Home() {
       </div>
 
       {/* PRODUCTS */}
-      <div style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: "20px",
-        marginTop: "40px"
-      }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: "20px",
+          marginTop: "40px"
+        }}
+      >
+        {products.length === 0 && <p>No products yet...</p>}
+
         {products.map(product => (
-          <div key={product.id} style={{
-            border: "1px solid #ddd",
-            padding: "15px",
-            borderRadius: "10px",
-            width: "250px"
-          }}>
-            <img src={product.image} style={{ width: "100%" }} />
+          <div
+            key={product.id}
+            style={{
+              border: "1px solid #ddd",
+              borderRadius: "10px",
+              padding: "15px",
+              width: "250px",
+              background: "white"
+            }}
+          >
+            <img
+              src={product.image}
+              alt={product.name}
+              style={{ width: "100%", borderRadius: "10px" }}
+            />
+
             <h3>{product.name}</h3>
             <p>${product.price}</p>
 
@@ -106,19 +137,21 @@ export default function Home() {
         ))}
       </div>
 
-      {/* 🧾 CART PANEL */}
+      {/* CART PANEL */}
       {showCart && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          right: 0,
-          width: "300px",
-          height: "100%",
-          background: "white",
-          boxShadow: "-2px 0 10px rgba(0,0,0,0.2)",
-          padding: "20px",
-          overflowY: "auto"
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            width: "300px",
+            height: "100%",
+            background: "white",
+            boxShadow: "-2px 0 10px rgba(0,0,0,0.2)",
+            padding: "20px",
+            overflowY: "auto"
+          }}
+        >
           <h2>Your Cart</h2>
 
           {cart.length === 0 && <p>No items</p>}
