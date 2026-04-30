@@ -65,7 +65,12 @@ export default function Home() {
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
+    <div style={{ 
+  textAlign: "center", 
+  padding: "20px",
+  backgroundColor: "#cceeff",
+  minHeight: "100vh"
+}}>
       
       {/* HEADER */}
       <h1 style={{ fontSize: "40px" }}>Bracelets By Jazz 💎</h1>
