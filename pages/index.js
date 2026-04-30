@@ -60,7 +60,14 @@ export default function Home() {
     <div style={{ textAlign: "center", padding: "20px" }}>
       <h1>Bracelets By Jazz 💎</h1>
       <p>Your colorful jewelry store</p>
-
+      <a href="/track">
+  <button style={{
+    padding: "10px",
+    marginTop: "10px",
+    cursor: "pointer"
+  }}>
+  Track Order
+</a>
       <img
         src="/banner.png"
         style={{ width: "100%", maxWidth: "900px", borderRadius: "10px" }}
