@@ -189,11 +189,14 @@ export default function Admin() {
       <h2>Products</h2>
 
       {products.map(product => (
-        <div key={product.id} style={{
-          border: "1px solid #ccc",
-          padding: "10px",
-          margin: "10px"
-        }}>
+       <div key={product.id} style={{
+  border: "1px solid #ccc",
+  padding: "15px",
+  margin: "10px",
+  borderRadius: "10px",
+  background: "white",
+  width: "200px"
+}}>
           <img src={product.image} style={{ width: "100px" }} />
           <p>{product.name}</p>
           <p>${product.price}</p>
