@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, getDocs, doc, updateDoc, addDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
 import app from "../lib/firebase";
 
 export default function Admin() {
@@ -8,7 +8,7 @@ export default function Admin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [orders, setOrders] = useState([]);
-
+  const [products, setProducts] = useState([]);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [image, setImage] = useState("");
@@ -16,11 +16,13 @@ export default function Admin() {
 
   const auth = getAuth(app);
 
+  // 🔁 LOAD DATA AFTER LOGIN
   useEffect(() => {
     onAuthStateChanged(auth, (u) => {
       if (u) {
         setUser(u);
         fetchOrders();
+        fetchProducts();
       }
     });
   }, []);
@@ -31,23 +33,37 @@ export default function Admin() {
       await signInWithEmailAndPassword(auth, email, password);
       alert("Login success");
     } catch (err) {
-      console.log(err);
       alert(err.message);
     }
   };
 
-  // 📦 GET ORDERS
-  const fetchOrders = async () => {
+  // 📦 FETCH PRODUCTS
+  const fetchProducts = async () => {
     const db = getFirestore(app);
-    const snapshot = await getDocs(collection(db, "orders"));
+    const snapshot = await getDocs(collection(db, "products"));
+
     const data = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    setProducts(data);
+  };
+
+  // 📦 FETCH ORDERS
+  const fetchOrders = async () => {
+    const db = getFirestore(app);
+    const snapshot = await getDocs(collection(db, "orders"));
+
+    const data = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
     setOrders(data);
   };
 
-  // 📸 UPLOAD IMAGE TO CLOUDINARY
+  // 📸 UPLOAD IMAGE
   const uploadImage = async (file) => {
     const data = new FormData();
     data.append("file", file);
@@ -87,14 +103,22 @@ export default function Admin() {
 
       alert("Product added!");
 
-      // reset fields
+      fetchProducts(); // 🔥 refresh list
+
       setName("");
       setPrice("");
       setImage("");
     } catch (err) {
-      console.error("ADD PRODUCT ERROR:", err);
       alert(err.message);
     }
+  };
+
+  // 🗑 DELETE PRODUCT
+  const deleteProduct = async (id) => {
+    const db = getFirestore(app);
+    await deleteDoc(doc(db, "products", id));
+    alert("Product deleted");
+    fetchProducts();
   };
 
   // 🚚 MARK ORDER DELIVERED
@@ -158,6 +182,27 @@ export default function Admin() {
       <button onClick={addProduct}>
         Add Product
       </button>
+
+      <hr />
+
+      {/* 📦 PRODUCTS */}
+      <h2>Products</h2>
+
+      {products.map(product => (
+        <div key={product.id} style={{
+          border: "1px solid #ccc",
+          padding: "10px",
+          margin: "10px"
+        }}>
+          <img src={product.image} style={{ width: "100px" }} />
+          <p>{product.name}</p>
+          <p>${product.price}</p>
+
+          <button onClick={() => deleteProduct(product.id)}>
+            Delete
+          </button>
+        </div>
+      ))}
 
       <hr />
 
