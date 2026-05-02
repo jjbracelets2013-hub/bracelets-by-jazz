@@ -187,13 +187,21 @@ export default function Admin() {
       <br /><br />
 
       <input
-        type="file"
-        onChange={async (e) => {
-          const file = e.target.files[0];
-          const url = await uploadImage(file);
-          setImage(url);
-        }}
-      />
+  type="file"
+  onChange={async (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    console.log("Uploading file...");
+
+    const url = await uploadImage(file);
+
+    console.log("IMAGE URL:", url);
+
+    setImage(url);
+  }}
+/>
 
       {uploading && <p>Uploading image...</p>}
 
